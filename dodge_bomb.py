@@ -63,6 +63,12 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
 
 #3.飛ぶ方向に従ってこうかとん画像を切り替える
 def get_kk_imgs(kk_img: pg.Surface) -> dict[tuple[int, int], pg.Surface]:
+    """
+    こうかとんの向きを辞書で返す関数
+    引数:こうかとん画像(kk_img)
+    戻り値:向きのデータが入った辞書
+    """
+
     img0 = kk_img # 左向き
     img1 = pg.transform.flip(img0, True, False) #左右反転
 
