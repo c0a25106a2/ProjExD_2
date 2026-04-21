@@ -60,13 +60,34 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     return (bb_imgs, bb_accs)
 
 
+#3.飛ぶ方向に従ってこうかとん画像を切り替える
+def get_kk_imgs(kk_img: pg.Surface) -> dict[tuple[int, int], pg.Surface]:
+    img0 = kk_img # 左向き
+    img1 = pg.transform.flip(img0, True, False) #左右反転
+
+    kk_dict = {
+        ( 0,  0): pg.transform.rotozoom(img1,   0, 1.0), # 初期
+        (+5,  0): pg.transform.rotozoom(img1,   0, 1.0), # 右
+        (+5, -5): pg.transform.rotozoom(img1,  45, 1.0), # 右上
+        ( 0, -5): pg.transform.rotozoom(img1,  90, 1.0), # 上
+        (-5, -5): pg.transform.rotozoom(img0, -45, 1.0), # 左上
+        (-5,  0): pg.transform.rotozoom(img0,   0, 1.0), # 左
+        (-5, +5): pg.transform.rotozoom(img0,  45, 1.0), # 左下
+        ( 0, +5): pg.transform.rotozoom(img1, -90, 1.0), # 下
+        (+5, +5): pg.transform.rotozoom(img1, -45, 1.0), # 右下
+    }
+    return kk_dict
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bg_img = pg.image.load("fig/pg_bg.jpg")   
+    bg_img = pg.image.load("fig/pg_bg.jpg")
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+    kk_img0 = pg.image.load("fig/3.png")  # 読み込み
+    kk_imgs = get_kk_imgs(kk_img0)  # 初期画像
 
     bb_img = pg.Surface((20, 20))  # 爆弾用の空のSurfaceを作る
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  # 爆弾円を描く
@@ -102,7 +123,10 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):  # 画面外だったら
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
+        
+        kk_img = kk_imgs[tuple(sum_mv)]  # こうかとん画像辞書から取り出し
         screen.blit(kk_img, kk_rct)
+
         bb_rct.move_ip(vx, vy)  # 爆弾を移動させる
         yoko, tate = check_bound(bb_rct)
         if not yoko:  # 横方向判定
