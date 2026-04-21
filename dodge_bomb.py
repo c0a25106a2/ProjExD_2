@@ -41,10 +41,23 @@ def gameover(screen: pg.Surface) -> None:
     screen.blit(black_image, [0, 0])
     pg.display.update()  # 画面再読み込み
     time.sleep(5)  # 5秒ストップ
-    
+
     return
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    爆弾Surfaceと加速度のリストをまとめたタプルを返す関数
+    戻り値:2つのリストをまとめたタプル
+    """
+    bb_imgs = []
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_imgs.append(bb_img)
+    bb_accs=[a for a in range(1, 11)]
+
+    return (bb_imgs, bb_accs)
 
 
 def main():
@@ -62,6 +75,8 @@ def main():
     bb_rct.centerx = random.randint(0, WIDTH)  # 爆弾の初期横座標を設定する
     bb_rct.centery = random.randint(0, HEIGHT)  # 爆弾の初期縦座標を設定する
     vx, vy = +5, +5  # 爆弾の速度
+
+    bb_imgs, bb_accs = init_bb_imgs()  # 爆弾surface,加速度のリスト
 
     clock = pg.time.Clock()
     tmr = 0
@@ -95,6 +110,14 @@ def main():
         if not tate:  # 縦方向判定
             vy *= -1
         screen.blit(bb_img, bb_rct)  # 爆弾を表示させる
+
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        avy = vy*bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        bb_img.set_colorkey((0, 0, 0))  # 黒部分の透明化
+
+        bb_rct.move_ip(avx, avy)  # 加速
+        
         pg.display.update()
         tmr += 1
         clock.tick(50)
